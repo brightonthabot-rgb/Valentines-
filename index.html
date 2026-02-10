@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To My Forever Valentine</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --primary-pink: #ffafbd;
+            --deep-rose: #ff5e78;
+            --soft-white: #fff0f3;
+            --text-gray: #4a4a4a;
+        }
+
+        /* Laughter Grid - Clean & Consistent */
+        .laughter-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-gap: 15px;
+            margin-top: 20px;
+            align-items: start; /* Keeps photos aligned even if they are different heights */
+        }
+
+        /* --- LIGHTBOX (FULL SCREEN VIEW) --- */
+        #lightbox {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            justify-content: center;
+            align-items: center;
+            cursor: zoom-out;
+        }
+
+        #lightbox img {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+            animation: popIn 0.3s ease-out;
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        /* Close Button */
+        #lightbox-close {
+            position: absolute;
+            top: 20px; right: 30px;
+            color: white; font-size: 40px; font-weight: bold;
+            cursor: pointer;
+        }
+
+        .funny-img {
+            width: 100%;
+            height: auto;       /* No more fixed 200px height */
+            display: block;
+            object-fit: contain; /* Shows the FULL image */
+            background-color: #fff0f3; /* Fills gaps for very thin/tall photos */
+            border-radius: 15px;
+            border: 3px solid #fbc2eb;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+
+        /* This ensures NO individual photo gets a forced height */
+        .funny-img:nth-child(1), 
+        .funny-img:nth-child(2), 
+        .funny-img:nth-child(3), 
+        .funny-img:nth-child(4) { 
+            height: auto !important; 
+        }
+
+        .funny-img:hover { 
+            transform: rotate(-2deg) scale(1.05); 
+            z-index: 5;
+        }
+
+        /* --- HERO PHOTO & ANIMATIONS --- */
+        .hero-photo {
+            width: 100%;
+            height: auto; 
+            max-height: 450px; /* Limits height so it doesn't push text too far down */
+            object-fit: contain; /* THE FIX: Shows the WHOLE photo, no cropping */
+            background-color: #fce4ec; /* Soft blush background for vertical photos */
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: 4px solid white;
+            display: block;
+        }
+
+        /* Animation for the Section appearing */
+        @keyframes sectionEntrance {
+            from { 
+                opacity: 0; 
+                transform: translateY(20px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+
+        /* The Cinematic Zoom Effect on the Hero Photo */
+        @keyframes slowZoom {
+            from { transform: scale(1); }
+            to { transform: scale(1.04); }
+        }
+
+        section:target .hero-photo, #home .hero-photo {
+            animation: slowZoom 4s ease-out forwards;
+        }
+
+        /* --- REST OF STYLING --- */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--soft-white);
+            color: var(--text-gray);
+            margin: 0; padding: 0; line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-pink), var(--deep-rose));
+            color: white; text-align: center; padding: 3rem 1rem;
+        }
+
+        nav {
+            display: flex; flex-wrap: wrap; justify-content: center;
+            background: white; position: sticky; top: 0; z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        nav a {
+            padding: 15px 20px; text-decoration: none; color: var(--deep-rose);
+            font-weight: bold; font-size: 0.9rem; transition: 0.3s;
+        }
+
+        nav a:hover { background-color: var(--soft-white); color: #ffafbd; }
+
+        .container { max-width: 800px; margin: 20px auto; padding: 20px; }
+
+        section {
+            display: none; 
+            animation: sectionEntrance 0.8s ease-out;
+            background: white; padding: 25px; border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+
+        /* Show the section that is currently linked in the URL */
+section:target { 
+    display: block; 
+}
+
+/* Show Home ONLY if no other tab is selected (when the URL doesn't have a #) */
+section:not(:target) {
+    display: none;
+}
+
+#home { 
+    display: block; 
+}
+
+/* This is the magic line: If any other section is active, hide Home */
+section:target ~ #home, 
+body:has(section:target) #home { 
+    display: none; 
+}
+
+        h2 { color: var(--deep-rose); border-bottom: 2px solid var(--soft-white); padding-bottom: 10px; }
+        img.single-photo { width: 100%; border-radius: 10px; margin-bottom: 15px; }
+
+        /* Laughter & Collage Grids */
+        .laughter-grid, .collage-grid {
+            display: grid; grid-gap: 15px; margin-top: 20px;
+        }
+        .laughter-grid { grid-template-columns: repeat(2, 1fr); }
+        .collage-grid { grid-template-columns: repeat(3, 1fr); }
+
+        .funny-img, .collage-img {
+            width: 100%; object-fit: cover; border-radius: 12px; cursor: pointer; transition: 0.3s;
+        }
+        .funny-img { height: 200px; border: 3px solid #fbc2eb; }
+        .collage-img { height: 150px; }
+        .collage-img:first-child { grid-column: span 2; grid-row: span 2; height: 315px; }
+
+        .verse-card {
+            background: #fff9fa; border-left: 5px solid var(--primary-pink);
+            padding: 20px; margin: 20px 0; border-radius: 12px; cursor: pointer; transition: 0.3s;
+        }
+        .verse-card:hover { transform: scale(1.02); border-left-color: var(--deep-rose); }
+
+        footer { text-align: center; padding: 2rem; font-size: 0.8rem; color: #999; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Happy Valentine's Day, Cadidah Nephawe!</h1>
+    <p>Every day with you is a gift.</p>
+</header>
+
+<nav>
+    <a href="#home">Home</a>
+    <a href="#gallery">Our Gallery</a>
+    <a href="#heart">My Heart</a>
+    <a href="#spiritual">My Prayer</a>
+    <a href="#vault">The Vault</a>
+    <a href="#story">Our Story</a>
+    <a href="#laughter">Laughter</a>
+    <a href="#future">Next Chapter</a>
+</nav>
+
+<div class="container">
+    <section id="home">
+        <div style="overflow: hidden; border-radius: 15px;"> <img src="main-1.jpg" class="hero-photo" alt="Welcome Home">
+        </div>
+        <h2>Welcome, My Love</h2>
+        <p>I built this space just for you. Whenever you feel down or just want to remember how much I love you, come here.</p>
+    </section>
+
+    <section id="gallery">
+        <div style="overflow: hidden; border-radius: 15px;">
+            <img src="main-2.jpg" class="hero-photo" alt="Gallery Hero">
+        </div>
+        <h2>Our Memories at the Beach 2025</h2>
+        <img src="beach-1.jpg" class="single-photo" alt="Beach Photo 1">
+        <p><i>"The sun was bright, but your smile was brighter."</i></p>
+        <img src="beach-2.jpg" class="single-photo" alt="Beach Photo 2">
+        <p>Remember this? This was my favorite day of the year.</p>
+    </section>
+
+    <section id="heart">
+        <div style="overflow: hidden; border-radius: 15px;">
+            <img src="main-3.jpg" class="hero-photo" alt="Heart Hero">
+        </div>
+        <h2>My Heart & Art</h2>
+        <p><strong>A Poem for You:</strong><br>
+        Roses are red, the ocean is blue,<br>
+        Building this site was easy, because it's for you.</p>
+        <h3>Our Drawings</h3>
+        <p>Here is a recent painting that I made and you said that you love.</p>
+        <img src="my-drawing.jpg" class="single-photo" alt="My Drawing">
+        <p>Here is my favorite of yours that I love.</p>
+        <img src="her-drawing.jpg" class="single-photo" alt="Her Drawing">
+    </section>
+
+    <section id="spiritual">
+        <div style="overflow: hidden; border-radius: 15px;">
+            <img src="main-4.jpg" class="hero-photo" alt="Prayer Hero">
+        </div>
+        <h2>A Prayer for Us</h2>
+        <p style="font-size: 0.8rem; color: #888;">🎶 Press play for a moment of peace:</p>
+        <audio controls style="width: 100%; height: 35px; margin-bottom: 20px;">
+            <source src="worship-song.mp3" type="audio/mpeg">
+        </audio>
+        <p style="font-size: 1.1rem; line-height: 1.8;">
+            "Lord, thank you for her heart. Grant us patience, forgiveness, and a love that reflects Your own. 
+            Watch over her today and always, and let our relationship be a light to others."
+        </p>
+        <div class="verse-card" onclick="fireConfetti('cheer')">
+            <p>"Love is patient, love is kind. It does not envy, it does not boast, it is not proud."</p>
+            <small>— 1 Corinthians 13:4</small>
+        </div>
+        <div class="verse-card" onclick="fireConfetti('peace')">
+            <p>"The Lord bless you and keep you; the Lord make his face shine on you..."</p>
+            <small>— Numbers 6:24-25</small>
+        </div>
+        <button onclick="fireConfetti('cheer')" style="display:block; margin: 30px auto 10px; padding: 12px 40px; background: #ff5e78; color: white; border: none; border-radius: 30px; cursor: pointer; font-weight: bold; font-size: 1rem;">
+            Amen ❤️
+        </button>
+    </section>
+
+    <section id="vault">
+        <div style="overflow: hidden; border-radius: 15px;">
+            <img src="main-5.jpg" class="hero-photo" alt="Vault Hero">
+        </div>
+        <h2>The Digital Vault</h2>
+        <p><i>Open these whenever you need them...</i></p>
+        <details onclick="fireConfetti('peace')" style="margin-bottom: 1rem; cursor: pointer;">
+            <summary><b>Open when you've had a long, stressful day</b></summary>
+            <p>Take a deep breath and drop your shoulders. I know how hard you work and how much you give to everyone else. Right now, just be still. I’m so proud of you, and I’m waiting to give you the biggest hug when I see you.</p>
+            <p><i>Come to me, all you who are weary and burdened, and I will give you rest. - Matthew 11:28</i></p>
+        </details>
+        <details onclick="fireConfetti('love')" style="margin-bottom: 1rem; cursor: pointer;">
+            <summary><b>Open when you miss me</b></summary>
+            <p>I need you to know that I love you and I am missing you too. Probably thinking a lot about you but I know you do it more.</p>
+        </details>
+        <details onclick="fireConfetti('cheer')" style="margin-bottom: 1rem; cursor: pointer;">
+            <summary><b>Open when you’re feeling insecure or "not enough"</b></summary>
+            <p>If you could see yourself through my eyes for just one minute, you’d never doubt your worth again. You are brilliant, kind, and stunningly beautiful—not just on the outside, but in your very soul. You are my favorite person.</p>
+            <p><i>You are altogether beautiful, my darling; there is no flaw in you. — Song of Solomon 4:7</i></p>
+        </details>
+        <details onclick="fireConfetti('memories')" style="margin-bottom: 1rem; cursor: pointer;">
+            <summary><b>Open when we’re apart and you miss me</b></summary>
+            <p>I’m probably looking at a photo of us right now, too. Close your eyes and remember the way it feels when I hold your hand. Distance is just a test to see how far love can travel, and my love for you is already there with you.</p>
+            <p><i> The Lord watch between me and thee, when we are absent one from another. — Genesis 31:49</i></p>
+        </details>
+        <details onclick="fireConfetti('story')" style="margin-bottom: 1rem; cursor: pointer;">
+            <summary><b>Open when you need courage for a big step</b></summary>
+            <p>You were made for great things. Whether it's a presentation, a tough conversation, or a new goal, you have a strength in you that is God-given. Don't let fear whisper louder than the truth: You can do this, and I am your #1 fan.</p>
+            <p><i>For God has not given us a spirit of fear, but of power and of love and of a sound mind. — 2 Timothy 1:7</i></p>
+        </details>
+        <details onclick="fireConfetti('future')" style="margin-bottom: 1rem; cursor: pointer;">
+            <summary><b>Open when you just need to feel loved</b></summary>
+            <p>Just a reminder: My love for you isn't based on what you do; it’s based on who you are. I chose you then, I choose you now, and I’ll choose you every single morning. You are my home.</p>
+            <p><i>And over all these virtues put on love, which binds them all together in perfect unity. — Colossians 3:14</i></p>
+        </details>
+    </section>
+
+    <section id="story">
+        <div style="overflow: hidden; border-radius: 15px;">
+            <img src="main-6.jpg" class="hero-photo" alt="Story Hero">
+        </div>
+        <h2>Our Milestones: Namibia 2025 🇳🇦</h2>
+        <div style="background: var(--soft-white); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+            <p><strong>📅 Date:</strong> 01 December 2025</p>
+            <p><strong>✨ Adventures:</strong> Sandboarding, Sandwich Harbour, & Swimming</p>
+            <p><i>Click the photos to see them full size!</i></p>
+        </div>
+        <div class="collage-grid">
+            <img src="namibia-1.jpg" class="collage-img" onclick="openLightbox(this)" alt="Featured Namibia">
+            <img src="namibia-2.jpg" class="collage-img" onclick="openLightbox(this)" alt="Sandboarding">
+            <img src="namibia-3.jpg" class="collage-img" onclick="openLightbox(this)" alt="Sandwich Harbour">
+            <img src="namibia-4.jpg" class="collage-img" onclick="openLightbox(this)" alt="Local Trip">
+            <img src="namibia-5.jpg" class="collage-img" onclick="fireConfetti('story'); openLightbox(this)" alt="Swimming">
+            <img src="namibia-6.jpg" class="collage-img" onclick="openLightbox(this)" alt="Sunset">
+            <img src="namibia-7.jpg" class="collage-img" onclick="openLightbox(this)" alt="Us">
+        </div>
+    </section>
+
+    <section id="laughter">
+        <div style="overflow: hidden; border-radius: 15px;">
+            <img src="main-7.jpg" class="hero-photo" alt="Laughter Hero">
+        </div>
+        <h2>When You Need a Laugh 😂</h2>
+        <div class="laughter-grid">
+            <img src="funny-1.jpg" class="funny-img" onclick="openLightbox(this)" alt="Funny 1">
+            <img src="funny-2.jpg" class="funny-img" onclick="openLightbox(this)" alt="Funny 2">
+            <img src="funny-3.jpg" class="funny-img" onclick="openLightbox(this)" alt="Funny 3">
+            <img src="funny-4.jpg" class="funny-img" onclick="openLightbox(this)" alt="Funny 4">
+        </div>
+    </section>
+
+    <section id="future">
+        <div style="overflow: hidden; border-radius: 15px;">
+            <img src="main-8.jpg" class="hero-photo" alt="Future Hero">
+        </div>
+        <h2>Our Future Adventures</h2>
+        <ul>
+            <li>Hiking in the mountains, unlike what we did the last time. LOL</li>
+            <li>Our first home together</li>
+            <li>Learning to dance</li>
+            <li>I will leave some to you as I know you have so many ideas because of your ability to day dream</li>
+        </ul>
+    </section>
+</div>
+
+<footer>Made with ❤️ by Thabo Brighton Makgoba | 2026</footer>
+
+<div id="lightbox" onclick="closeLightbox()">
+        <span id="lightbox-close">&times;</span>
+        <img id="lightbox-img" src="" alt="Full View">
+    </div>
+
+<div id="lightbox" onclick="closeLightbox()">
+        <span id="lightbox-close">&times;</span>
+        <img id="lightbox-img" src="" alt="Full View">
+    </div>
+
+    <script>
+        function fireConfetti(colorScheme) {
+            if (typeof confetti === "function") {
+                let colors;
+                if (colorScheme === 'love') {
+                    colors = ['#ff0000', '#ff69b4', '#ffafbd'];
+                } else if (colorScheme === 'cheer') {
+                    colors = ['#ffd700', '#ffffff', '#ffcc00'];
+                } else if (colorScheme === 'peace') {
+                    colors = ['#b3e5fc', '#ffffff', '#81d4fa'];
+                } else if (colorScheme === 'memories') {
+                    colors = ['#ff9a9e', '#fecfef', '#fbc2eb'];
+                } else if (colorScheme === 'story') {
+                    colors = ['#8e9eab', '#eef2f3', '#7a7a7a'];
+                } else if (colorScheme === 'future') {
+                    colors = ['#a1c4fd', '#c2e9fb', '#d4fc79'];
+                } else if (colorScheme === 'laughter') {
+                    colors = ['#ff00ff', '#00ff00', '#ffff00', '#00ffff', '#ff9900'];
+                } else {
+                    colors = ['#ffafbd', '#ff5e78', '#ffffff'];
+                }
+
+                confetti({
+                    particleCount: 150,
+                    spread: 70,
+                    origin: { y: 0.6 },
+                    colors: colors
+                });
+            }
+        }
+
+        // NEW: Function to show photo in full screen
+        function openLightbox(imgElement) {
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImg = document.getElementById('lightbox-img');
+            
+            lightboxImg.src = imgElement.src; // Get the source of the clicked image
+            lightbox.style.display = 'flex'; // Show the overlay
+            
+            // Fires the "memories" confetti theme when she clicks a photo
+            fireConfetti('memories');
+        }
+
+        // NEW: Function to close full screen
+        function closeLightbox() {
+            document.getElementById('lightbox').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
